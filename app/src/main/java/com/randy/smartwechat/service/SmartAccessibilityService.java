@@ -1,4 +1,4 @@
-package com.newpostech.randy.smartwechat.service;
+package com.randy.smartwechat.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
