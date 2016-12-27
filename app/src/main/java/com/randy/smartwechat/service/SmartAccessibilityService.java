@@ -1,7 +1,10 @@
 package com.randy.smartwechat.service;
 
 import android.accessibilityservice.AccessibilityService;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.orhanobut.logger.Logger;
 
 /**
  * Author: randy(dddrandy@gmail.com)
@@ -12,8 +15,14 @@ import android.view.accessibility.AccessibilityEvent;
 
 public class SmartAccessibilityService extends AccessibilityService {
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+    }
 
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        int eventType = event.getEventType();
+        Logger.d("eventType:" + eventType);
     }
 
     @Override
