@@ -1,7 +1,12 @@
 package com.randy.smartwechat.service;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.KeyguardManager;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Parcelable;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -23,7 +28,7 @@ import static com.randy.smartwechat.utils.Constants.TAG;
  */
 
 public class SmartAccessibilityService extends AccessibilityService {
-    private boolean flag1;
+    private boolean flag1 = true;
     private boolean flag2;
     private boolean flag3;
     private boolean flag4;
@@ -48,8 +53,13 @@ public class SmartAccessibilityService extends AccessibilityService {
                 if ("android.widget.ListView".equals(eventClassName)
                         || "android.widget.TextView".equals(eventClassName)) {
                     AccessibilityNodeInfo info = getRootInActiveWindow();
-                    flag1 = flag2 = flag3 = flag4 = false;
+                    flag3 = flag4 = false;
                     getChildText(info);
+                    if (flag1) {
+                        checkPacket();
+                    }
+                    flag1 = false;
+
                 }
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
@@ -64,21 +74,58 @@ public class SmartAccessibilityService extends AccessibilityService {
                 }
                 break;
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
-
+                List<CharSequence> texts = event.getText();
+                if (texts == null) {
+                    return;
+                }
+                for (CharSequence text : texts) {
+                    String string = text.toString();
+                    if (string.contains("[微信红包]")) {
+                        Parcelable parcelableData = event.getParcelableData();
+                        if (parcelableData != null && parcelableData instanceof Notification) {
+                            PendingIntent pendingIntent = ((Notification) parcelableData).contentIntent;
+                            try {
+                                wakeScreen();
+                                pendingIntent.send();
+                            } catch (PendingIntent.CanceledException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
                 break;
             case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
                 break;
             case AccessibilityEvent.TYPE_VIEW_SCROLLED:
                 Log.d(TAG, "onAccessibilityEvent: View Scrolled");
-
-                flag1 = flag2 = false;
+                mMap.clear();
+                flag1 = flag2 = true;
                 break;
         }
     }
 
+    private void wakeScreen() {
+        PowerManager manager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (!manager.isScreenOn()) {
+            PowerManager.WakeLock wakeLock = manager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP, "ACQUIRE_CAUSES_WAKEUP");
+            wakeLock.acquire();
+        }
+        KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+        km.newKeyguardLock("keyguard lock").disableKeyguard();
+    }
+
+    private void checkPacket() {
+        for (Map.Entry<AccessibilityNodeInfo, Boolean> entry : mMap.entrySet()) {
+            if (entry.getValue()) {
+                performClick(entry.getKey());
+                entry.setValue(false);
+            }
+        }
+    }
+
     private void getChildText(AccessibilityNodeInfo info) {
-        if (info == null) {
-            Log.d(TAG, "getChildText: info = null");
+        if (info == null || !flag1) {
+            Log.d(TAG, "getChildText: info = null or checked");
             return;
         }
         int childCount = info.getChildCount();
@@ -87,14 +134,7 @@ public class SmartAccessibilityService extends AccessibilityService {
         if (charSequence != null) {
             text = charSequence.toString();
         }
-//        Log.d(TAG, "getChildText: childCount == " + childCount);
         if (childCount == 0 && text != null) {
-//            Log.d(TAG, "getChildText: " + text);
-            /*if (getString(R.string.new_friends).equals(text)) {
-                flag1 = true;
-            } else if (getString(R.string.saved_groups).equals(text)) {
-                flag2 = true;
-            } else */
             if (getString(R.string.get_lucky_money).equals(text)) {
                 flag3 = true;
             } else if (getString(R.string.lucky_money).equals(text)) {
@@ -104,14 +144,18 @@ public class SmartAccessibilityService extends AccessibilityService {
             }
             if (flag3 && flag4) {
                 Log.d(TAG, "抢红包===========" + info.isClickable());
-                performClick(info);
+//                performClick(info);
+                while (info != null) {
+                    if (info.isClickable()) {
+                        mMap.put(info, !mMap.containsKey(info));
+                        return;
+                    }
+                    info = info.getParent();
+                }
             }
         } else {
             for (int i = 0; i < childCount; i++) {
                 getChildText(info.getChild(i));
-                if (flag1 && flag2) {
-                    break;
-                }
             }
         }
 
@@ -138,7 +182,7 @@ public class SmartAccessibilityService extends AccessibilityService {
         }
         List<AccessibilityNodeInfo> infos = nodeInfo.findAccessibilityNodeInfosByViewId(viewId);
         if (infos.size() == 0 && !"com.tencent.mm:id/bdl".equals(viewId)) {
-            Log.d(TAG, "click: 红包过期或未找到打开红包按钮id");
+            Log.d(TAG, "checkPacket: 红包过期或未找到打开红包按钮id");
             click("com.tencent.mm:id/bdl");
         }
         for (AccessibilityNodeInfo info : infos) {
