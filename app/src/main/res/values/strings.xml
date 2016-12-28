@@ -6,4 +6,8 @@
     <string name="open_settings">open settings</string>
     <string name="start_service">start service</string>
     <string name="stop_service">stop service</string>
+    <string name="new_friends">新的朋友</string>
+    <string name="saved_groups">群聊</string>
+    <string name="get_lucky_money">领取红包</string>
+    <string name="lucky_money">微信红包</string>
 </resources>
