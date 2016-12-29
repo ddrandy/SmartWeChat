@@ -15,19 +15,99 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+        android:labelFor="@id/et_notify_mark"
+        android:text="@string/notify_mark"/>
+
+    <EditText
+        android:id="@id/et_notify_mark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:inputType="text"
+        android:maxLength="20"
+        android:maxLines="1"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@id/et_receive_open"
+        android:text="@string/receive_open"/>
+
+    <EditText
+        android:id="@id/et_receive_open"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:inputType="text"
+        android:maxLength="20"
+        android:maxLines="1"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@id/et_receive_quit"
+        android:text="@string/receive_quit"/>
+
+    <EditText
+        android:id="@id/et_receive_quit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:inputType="text"
+        android:maxLength="20"
+        android:maxLines="1"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@id/et_detail_quit"
+        android:text="@string/detail_quit"/>
+
+    <EditText
+        android:id="@id/et_detail_quit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:inputType="text"
+        android:maxLength="20"
+        android:maxLines="1"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@id/save_config"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingEnd="5dp"
+            android:paddingStart="0dp"
+            android:text="@string/save"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@id/reset_config"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingEnd="0dp"
+            android:paddingStart="5dp"
+            android:text="@string/reset"
+            android:textAllCaps="false"/>
+    </LinearLayout>
 
     <Button
         android:id="@id/open_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/open_settings"
-        android:textAllCaps="false"/>
-
-    <Button
-        android:id="@id/switch_option"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/start_service"
+        android:layout_marginTop="15dp"
+        android:text="@string/open"
         android:textAllCaps="false"/>
 </LinearLayout>

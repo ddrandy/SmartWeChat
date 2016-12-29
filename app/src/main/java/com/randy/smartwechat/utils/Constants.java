@@ -8,5 +8,15 @@ package com.randy.smartwechat.utils;
  */
 
 public interface Constants {
+
     String TAG = "SmartWeChat";
+
+    String LIST_VIEW = "android.widget.ListView";
+    String TEXT_VIEW = "android.widget.TextView";
+
+    String RECEIVE_UI = "com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyReceiveUI";
+    String DETAIL_UI = "com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyDetailUI";
+    String LAUNCHER_UI = "com.tencent.mm.ui.LauncherUI";
+
+    String PACKAGE_ID = "com.tencent.mm:id/";
 }

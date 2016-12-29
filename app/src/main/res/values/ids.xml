@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item name="save_config" type="id"/>
+    <item name="reset_config" type="id"/>
     <item name="open_settings" type="id"/>
-    <item name="switch_option" type="id"/>
+    <item name="et_notify_mark" type="id"/>
+    <item name="et_receive_open" type="id"/>
+    <item name="et_receive_quit" type="id"/>
+    <item name="et_detail_quit" type="id"/>
 </resources>

@@ -12,12 +12,20 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.randy.smartwechat.R;
+import com.randy.smartwechat.utils.SPUtil;
+import com.randy.smartwechat.utils.StringUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.randy.smartwechat.utils.Constants.DETAIL_UI;
+import static com.randy.smartwechat.utils.Constants.LAUNCHER_UI;
+import static com.randy.smartwechat.utils.Constants.LIST_VIEW;
+import static com.randy.smartwechat.utils.Constants.PACKAGE_ID;
+import static com.randy.smartwechat.utils.Constants.RECEIVE_UI;
 import static com.randy.smartwechat.utils.Constants.TAG;
+import static com.randy.smartwechat.utils.Constants.TEXT_VIEW;
 
 
 /**
@@ -32,13 +40,30 @@ public class SmartAccessibilityService extends AccessibilityService {
     private boolean flag2;
     private boolean flag3;
     private boolean flag4;
+
     private Map<AccessibilityNodeInfo, Boolean> mMap;
+    private String NOTIFY_MARK;
+    private String RECEIVE_OPEN;
+    private String RECEIVE_QUIT;
+    private String DETAIL_QUIT;
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         Log.d(TAG, "onServiceConnected: ");
+        init();
+    }
+
+    private void init() {
         mMap = new HashMap<>();
+        StringUtil.init(this);
+
+        // load String
+        NOTIFY_MARK = StringUtil.getNotifyMark();
+        RECEIVE_OPEN = PACKAGE_ID + StringUtil.getReceiveOpen();
+        RECEIVE_QUIT = PACKAGE_ID + StringUtil.getReceiveQuit();
+        DETAIL_QUIT = PACKAGE_ID + StringUtil.getDetailQuit();
+
     }
 
     @Override
@@ -50,8 +75,8 @@ public class SmartAccessibilityService extends AccessibilityService {
         switch (eventType) {
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
 
-                if ("android.widget.ListView".equals(eventClassName)
-                        || "android.widget.TextView".equals(eventClassName)) {
+                if (LIST_VIEW.equals(eventClassName)
+                        || TEXT_VIEW.equals(eventClassName)) {
                     AccessibilityNodeInfo info = getRootInActiveWindow();
                     flag3 = flag4 = false;
                     getChildText(info);
@@ -63,14 +88,17 @@ public class SmartAccessibilityService extends AccessibilityService {
                 }
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-                if ("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyReceiveUI".equals(eventClassName)) {
+                if (RECEIVE_UI.equals(eventClassName)) {
                     // 打开红包
                     Log.d(TAG, "onAccessibilityEvent: 打开红包");
-                    click("com.tencent.mm:id/bdh");
-                } else if ("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyDetailUI".equals(eventClassName)) {
+                    click(RECEIVE_OPEN);
+                } else if (DETAIL_UI.equals(eventClassName)) {
                     // 退出详情
                     Log.d(TAG, "onAccessibilityEvent: 退出详情");
-                    click("com.tencent.mm:id/gq");
+                    click(DETAIL_QUIT);
+                } else if (LAUNCHER_UI.equals(eventClassName)) {
+                    // 微信主页
+
                 }
                 break;
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
@@ -80,7 +108,7 @@ public class SmartAccessibilityService extends AccessibilityService {
                 }
                 for (CharSequence text : texts) {
                     String string = text.toString();
-                    if (string.contains("[微信红包]")) {
+                    if (string.contains(NOTIFY_MARK)) {
                         Parcelable parcelableData = event.getParcelableData();
                         if (parcelableData != null && parcelableData instanceof Notification) {
                             PendingIntent pendingIntent = ((Notification) parcelableData).contentIntent;
@@ -98,27 +126,30 @@ public class SmartAccessibilityService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_VIEW_SCROLLED:
                 Log.d(TAG, "onAccessibilityEvent: View Scrolled");
-                mMap.clear();
-                flag1 = flag2 = true;
+                if (!flag2) {
+                    mMap.clear();
+                }
+                flag1 = true;
                 break;
         }
     }
 
     private void wakeScreen() {
-        PowerManager manager = (PowerManager) getSystemService(POWER_SERVICE);
-        if (!manager.isScreenOn()) {
-            PowerManager.WakeLock wakeLock = manager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP, "ACQUIRE_CAUSES_WAKEUP");
-            wakeLock.acquire();
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (!powerManager.isScreenOn()) {
+            PowerManager.WakeLock wake = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+            wake.acquire();
         }
-        KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-        km.newKeyguardLock("keyguard lock").disableKeyguard();
+        ((KeyguardManager) getSystemService(KEYGUARD_SERVICE)).newKeyguardLock(KEYGUARD_SERVICE).disableKeyguard();
     }
 
     private void checkPacket() {
+        flag2 = false;
         for (Map.Entry<AccessibilityNodeInfo, Boolean> entry : mMap.entrySet()) {
             if (entry.getValue()) {
                 performClick(entry.getKey());
                 entry.setValue(false);
+                flag2 = true;
             }
         }
     }
@@ -143,15 +174,15 @@ public class SmartAccessibilityService extends AccessibilityService {
                 flag3 = flag4 = false;
             }
             if (flag3 && flag4) {
-                Log.d(TAG, "抢红包===========" + info.isClickable());
 //                performClick(info);
                 while (info != null) {
                     if (info.isClickable()) {
                         mMap.put(info, !mMap.containsKey(info));
-                        return;
+                        break;
                     }
                     info = info.getParent();
                 }
+                Log.d(TAG, "抢红包===========" + mMap.get(info));
             }
         } else {
             for (int i = 0; i < childCount; i++) {
@@ -181,9 +212,9 @@ public class SmartAccessibilityService extends AccessibilityService {
             return;
         }
         List<AccessibilityNodeInfo> infos = nodeInfo.findAccessibilityNodeInfosByViewId(viewId);
-        if (infos.size() == 0 && !"com.tencent.mm:id/bdl".equals(viewId)) {
+        if (infos.size() == 0 && !RECEIVE_QUIT.equals(viewId)) {
             Log.d(TAG, "checkPacket: 红包过期或未找到打开红包按钮id");
-            click("com.tencent.mm:id/bdl");
+            click(RECEIVE_QUIT);
         }
         for (AccessibilityNodeInfo info : infos) {
             performClick(info);
@@ -199,11 +230,5 @@ public class SmartAccessibilityService extends AccessibilityService {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate: ");
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand: on Start Command");
-        return super.onStartCommand(intent, flags, startId);
     }
 }
