@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">SmartWeChat</string>
+    <string name="host_url">www.randyGo.tk</string>
+    <string name="service_label">auto click Red Packet</string>
+    <string name="accessibility_service_description">This service helps you click Red Packet on WeChat Automatically</string>
+    <string name="save">save</string>
+    <string name="reset">reset</string>
+    <string name="open">open settings</string>
+    <string name="new_friends">New Friends</string>
+    <string name="saved_groups">Saved Groups</string>
+    <string name="get_lucky_money">领取红包</string>
+    <string name="lucky_money">微信红包</string>
+    <string name="notify_mark">新信息标识</string>
+    <string name="receive_open">红包页开启id</string>
+    <string name="receive_quit">红包页关闭id</string>
+    <string name="detail_quit">红包详情页退出id</string>
+</resources>

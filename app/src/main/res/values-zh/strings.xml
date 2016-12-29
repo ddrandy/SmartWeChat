@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">红包间谍</string>
+    <string name="host_url">www.randyGo.tk</string>
+    <string name="service_label">自动打开红包</string>
+    <string name="accessibility_service_description">开启本服务可帮你自动打开微信红包</string>
+    <string name="save">保存</string>
+    <string name="reset">默认</string>
+    <string name="open">设置窗口</string>
+    <string name="new_friends">新的朋友</string>
+    <string name="saved_groups">群聊</string>
+    <string name="get_lucky_money">领取红包</string>
+    <string name="lucky_money">微信红包</string>
+    <string name="notify_mark">新信息标识</string>
+    <string name="receive_open">红包页开启id</string>
+    <string name="receive_quit">红包页关闭id</string>
+    <string name="detail_quit">红包详情页退出id</string>
+</resources>
